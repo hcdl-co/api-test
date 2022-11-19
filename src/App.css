@@ -78,3 +78,14 @@
 .col {
   background: salmon;
 }
+
+button {
+  background-color: #193368;
+margin: 5%;
+  display: flex;
+ border-radius: 12px;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(9px + 2vmin);
+  color: white;
+}

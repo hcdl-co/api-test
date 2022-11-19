@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import bcAPI from "./apis/bluecrossapi";
 
-function App() {
+export default function App() {
   return (
     <div className="App">
       <header className="App-header">
@@ -36,10 +36,9 @@ function App() {
           <div className="col">This little piggy had roast beef.</div>
         </div>
       </main>
-
       <button onClick={bcAPI()}>Test</button>
     </div>
   );
 }
 
-export default App;
+
