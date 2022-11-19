@@ -1,9 +1,47 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
-import bcAPI from "./apis/bluecrossapi";
+import API from "./utils/BlueCross_API";
+
+function ShowResponse(res) {
+  let providerList = [res]
+  console.log(providerList[0][0])
+ 
+if (res) {
+
+  console.log(res.name);
+  console.log(res.length);
+  console.log(res.type);
+  // return (
+  //   <p>{res}</p>
+  // )
+}
+
+
+
+// }
+}
+
 
 export default function App() {
+
+
+  const searchProviders = async () => {
+   await API.getProviders().then (res => {
+    // ShowResponse(res);
+    console.log(res)
+    console.log(res.length)
+   }
+    )
+  
+  }
+
+  useEffect(() =>
+    searchProviders
+  )
+
+ 
+
   return (
     <div className="App">
       <header className="App-header">
@@ -16,12 +54,20 @@ export default function App() {
 
 
       <main>
-        <div className="flex-grid">
+      <button onClick={searchProviders}>Test</button>
+        {/* <div className="flex-grid">
           <div className="col">This little piggy went to market.</div>
           <div className="col">This little piggy stayed home.</div>
           <div className="col">This little piggy had roast beef.</div>
-        </div>
+        </div> */}
+     
+    
+          <ShowResponse/>
 
+        
+
+        
+      
         <div className="flex-grid">
           <div className="col">This little piggy went to market.</div>
           <div className="col">This little piggy stayed home.</div>
@@ -30,13 +76,13 @@ export default function App() {
           <div className="col">This little piggy went wee wee wee all the way home.</div>
         </div>
 
-        <div className="flex-grid-thirds">
+        {/* <div className="flex-grid-thirds">
           <div className="col">This little piggy went to market.</div>
           <div className="col">This little piggy stayed home.</div>
           <div className="col">This little piggy had roast beef.</div>
-        </div>
+        </div> */}
       </main>
-      <button onClick={bcAPI()}>Test</button>
+
     </div>
   );
 }
