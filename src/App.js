@@ -2,11 +2,17 @@ import React, { useEffect, useState } from "react";
 
 const App = () => {
   const [advice, setAdvice] = useState("");
-const [addressList, setAddressList] = useState([]);
-const [providerList, setProviderList] = useState("");
+  const [addressList, setAddressList] = useState([]);
+  const [providerList, setProviderList] = useState([]);
 
-let addressArray = [];
-let providerArray = [];
+  function showData(){
+    console.log(advice);
+    for(let i = 0; i<advice.length; i++) {
+      console.log(advice[i].resource.name)
+    }
+  }
+
+
   useEffect(() => {
     let nameQuery = "john";
     let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&name=${nameQuery}`;
@@ -15,41 +21,9 @@ let providerArray = [];
         const response = await fetch(url);
         const json = await response.json();
         console.log(json.entry);
-        setAdvice(JSON.stringify(json.entry));
-     
-        for (let i = 0; i < json.entry.length; i++) {
-          providerArray.push(i, json.entry[i].resource.name,json.entry[i].resource.telecom[0].value, json.entry[i].resource.specialty)
-      
-           console.log(providerArray)
-   
+        setAdvice(json.entry);
 
-
-          let locationQuery = json.entry[i].resource.location[0].reference;
-          let locationLink = `https://public.fhir.flex.optum.com/R4/${locationQuery}`;
-          // const fetchLocation = async () => {
-          //   try {
-          //     const locationResponse = await fetch(locationLink);
-          //     const locHolder = await locationResponse.json();
-          //     console.log(locHolder.address.text);
-             
-          //     addressArray.push(locHolder.address.text);
-          //     console.log(addressArray.length)
-          //     setAddressList(addressArray)
-          // // console.log(addressArray);
-          // // setAddressList(addressArray);
-         
-          //   } catch (error) {
-          //     console.log("error", error);
-          //   }
-          //   return addressArray
-          // };
-        
-          // fetchLocation();
-        return providerArray
-    
-        }
-        setProviderList(JSON.stringify(providerArray));
-        console.log(providerList);
+  
       } catch (error) {
         console.log("error", error);
       }
@@ -61,13 +35,13 @@ let providerArray = [];
 
   return (
     <div>
-      <p>{advice}</p>
+      {/* <p>{advice}</p> */}
       {/* {addressList.map((address, i) => {
         return <p key={i}>{address}</p>
       })
 
       } */}
-
+  <button onClick={showData}>Show Data</button>
     </div>
   );
 };
