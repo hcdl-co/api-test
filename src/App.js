@@ -17,26 +17,30 @@ const App = () => {
     }
   }
 
-  function showAddress() {
+  function showAddress(e) {
+    console.log(e.target);
+    console.log(e.target.value);
 
-    
       const fetchLocation = async () => {
         try {
-          // locationURLs.forEach((location ) => {
-            let location = locationURLs[0];
+       
+            let location = locationURLs[e.target.value];
             let locationLink = `https://public.fhir.flex.optum.com/R4/${location}`;
           const response = await fetch(locationLink);
           const json = await response.json();
+          getLocationURLs(json.name)
           console.log(json.name); 
-        // })
-  
+ 
+
+       e.target.innerHTML = json.name
+
         } catch (error) {
           console.log("error", error);
         }
       }; 
   
       fetchLocation();
-  
+
       // console.log(providerArray);
   
   }
@@ -77,7 +81,7 @@ const App = () => {
           </tr>
           <tr>
             <td>{providerArray[0].resource.name}</td>
-            <td><button onClick={showAddress}>Show Address</button></td>
+            <td><button  value= '0'onClick={showAddress}>Show Address</button></td>
             <td>{providerArray[0].resource.telecom[0].value}</td>
             {/* <td>{providerArray[0].resource.specialty}</td> */}
           </tr>
