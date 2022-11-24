@@ -1,20 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const App = () => {
   const [providerArray, setProviderArray] = useState("");
   const [gotData, setGotData] = useState(false);
-
+  const [locationURLs, getLocationURLs] = useState([])
 
   function showData() {
     console.log(providerArray);
     setGotData(true);
-
+    console.log(locationURLs);
     for (let i = 0; i < providerArray.length; i++) {
       console.log(providerArray[i].resource.name);
       if(providerArray[i].resource.specialty !== undefined){
       console.log(providerArray[i].resource.specialty[0].text)}
 
     }
+  }
+
+  function showAddress() {
+
+    
+      const fetchLocation = async () => {
+        try {
+          // locationURLs.forEach((location ) => {
+            let location = locationURLs[0];
+            let locationLink = `https://public.fhir.flex.optum.com/R4/${location}`;
+          const response = await fetch(locationLink);
+          const json = await response.json();
+          console.log(json.name); 
+        // })
+  
+        } catch (error) {
+          console.log("error", error);
+        }
+      }; 
+  
+      fetchLocation();
+  
+      // console.log(providerArray);
+  
   }
 
 
@@ -27,23 +51,23 @@ const App = () => {
         const json = await response.json();
         console.log(json.entry);
         setProviderArray(json.entry);
-
-
+        let locURLArray =[];
+        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
+        getLocationURLs(locURLArray);
       } catch (error) {
         console.log("error", error);
       }
     };
-
+ 
     fetchData();
 
-    // console.log(providerArray);
   }, []);
+
 
 
   if (gotData === true) {
     return (
       <div>
-        <p>{providerArray[0].resource.name}</p>
         <table>
           <tr>
             <th>name</th>
@@ -53,7 +77,7 @@ const App = () => {
           </tr>
           <tr>
             <td>{providerArray[0].resource.name}</td>
-            <td><p>naah</p></td>
+            <td><button onClick={showAddress}>Show Address</button></td>
             <td>{providerArray[0].resource.telecom[0].value}</td>
             {/* <td>{providerArray[0].resource.specialty}</td> */}
           </tr>
