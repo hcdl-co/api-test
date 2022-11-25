@@ -1,52 +1,33 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState} from "react";
+import logo from './logo.svg';
+import './App.css';
 
 const App = () => {
   const [providerArray, setProviderArray] = useState("");
   const [gotData, setGotData] = useState(false);
   const [locationURLs, getLocationURLs] = useState([])
-
-  const [providerNameList, setProviderNameList] = useState([]);
-  const [providerAddressList, setProviderAddressList] = useState([]);
-  const [providerPhoneList, setProviderPhoneList] = useState([]);
   const [providerSpecialtyList, setProviderSpecialtyList] = useState([]);
 
   function showData() {
     console.log(providerArray);
     setGotData(true);
-    console.log(locationURLs);
-    for (let i = 0; i < providerArray.length; i++) {
-      // console.log(providerArray[i].resource.name);
-      if(providerArray[i].resource.specialty !== undefined){
-      // console.log(providerArray[i].resource.specialty[0].text);
-      setProviderSpecialtyList(providerArray[i].resource.specialty[0].text)
-      // let special = document.getElementById('specialty');
-      // special.innerHTML =providerArray[i].resource.specialty[0].text
-    } else {
 
-    }
-
-    }
   }
 
   function showAddress(e) {
 
-    console.log("e.target.value: " +e.target.value);
     let location = locationURLs[e.target.value];
-    console.log("locationURLs[3]: "+locationURLs[3]);
-    console.log(" console.log(locationURLs); outside async: " +locationURLs);
+
     const fetchLocation = async () => {
       try {
-
-        console.log(" console.log(locationURLs); inside async: " +locationURLs);
 
         let locationLink = `https://public.fhir.flex.optum.com/R4/${location}`;
         const response = await fetch(locationLink);
         const json = await response.json();
-        if(locationURLs== [] ){
+        if(locationURLs === [] ){
           getLocationURLs(json.name)
         }
-        // getLocationURLs(json.name)
-        console.log("json.name: " + json.name);
+
         e.target.innerHTML = json.name
 
       } catch (error) {
@@ -55,8 +36,6 @@ const App = () => {
     };
 
     fetchLocation();
-
-      // console.log(providerArray);
   
   }
 
@@ -68,11 +47,24 @@ const App = () => {
       try {
         const response = await fetch(url);
         const json = await response.json();
-        // console.log(json.entry);
+
         setProviderArray(json.entry);
+
         let locURLArray =[];
         json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
         getLocationURLs(locURLArray);
+
+        let specialtyArray =[];
+        json.entry.forEach(provider => { 
+
+          if(provider.resource.specialty){
+           specialtyArray.push(provider.resource.specialty[0].text)
+        } else {
+          specialtyArray.push('Not Available')
+        }
+        setProviderSpecialtyList(specialtyArray);
+      })
+
       } catch (error) {
         console.log("error", error);
       }
@@ -85,31 +77,32 @@ const App = () => {
 
 
   if (gotData === true) {
+  
     return (
-      <div>
+      <div className="App">
+          <header className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+            <h1>United Healthcare Providers</h1>
+          <p>brought to you by healthcare Download. Get in control, stay in control</p></header>
         <table>
           <tr>
             <th>name</th>
             <th>address</th>
             <th>phone number</th>
             <th>specialty</th>
-          </tr>
-          {/* <tr>
-            <td>{providerArray[0].resource.name}</td>
-            <td><button  value= '0'onClick={showAddress}>Show Address</button></td>
-            <td>{providerArray[0].resource.telecom[0].value}</td>
-            <td id='specialty'></td>
-          
-          </tr> */}
+            </tr>
+    
+
      
       { providerArray.map((provider,index) => {
-
+       
       return (
-        <tr>
+        <tbody key={provider}>
           <td key={index}>{provider.resource.name}</td>
-          <td><button value={index} onClick={showAddress}>Show Address</button></td>
+          <td><button key={index/10}value={index} onClick={showAddress}>Show Address</button></td>
           <td key={index *10}>{provider.resource.telecom[0].value}</td>
-        </tr> 
+          <td key= {index/5}>{providerSpecialtyList[index]}</td>
+        </tbody> 
     
     ) }) }
      
@@ -121,28 +114,19 @@ const App = () => {
 
   } else {
     return (
-      <div>  <button onClick={showData}>Show Data</button></div>
+
+      <div className="App">
+        <header className="App-header">
+          <h1>Search for a United Healthcare Provider</h1>
+          <p>brought to you by Healthcare Download. Get in control, stay in control.</p>
+          </header>
+        <main>
+
+        <input placeholder='Look for a provider '></input>  <button onClick={showData}>Show Data</button>
+        </main>
+        </div>
     )
   }
-  //   return (
-  //     <div>
-  //       {/* <p>{providerArray}</p> */}
-  //       {/* {addressList.map((address, i) => {
-  //         return <p key={i}>{address}</p>
-  //       })
-
-  //       } */}
-  //   <button onClick={showData}>Show Data</button>
-
-  //   {gotData ? (
-  // providerArray.map((provider, i) => {
-  //   return (
-  // <div><p>{provider[i].resource.name}</p> </div>
-  //   )
-  // })
-  //   ): (<p>{gotData}</p>)}
-  //     </div>
-  //   );
 };
 
 export default App;

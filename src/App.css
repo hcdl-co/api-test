@@ -3,9 +3,9 @@
 }
 
 .App-logo {
-  height: 20vmin;
+  height: 10vmin;
   pointer-events: none;
-  padding-top: 20px;
+  margin-top:5%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -15,7 +15,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color:  rgb(17, 66, 40);
   min-height: 30vh;
   display: flex;
   flex-direction: column;
@@ -28,6 +28,32 @@
 .App-link {
   color: #61dafb;
 }
+
+p {
+  font-size: 0.75rem;
+}
+
+table {
+
+  margin: 10%;
+}
+th {
+  border-color: #282c34;
+  border-width: 2px;
+  border-style: outset;
+  margin: 10%;
+}
+tr{
+  padding: 3%;
+}
+ tbody {
+  border-color: #282c3465;
+  border-width: 2px;
+  border-bottom-color: transparent;
+  border-top-color: transparent;
+  border-style: outset;
+}
+
 
 @keyframes App-logo-spin {
   from {
@@ -80,12 +106,10 @@
 }
 
 button {
-  background-color: #193368;
-margin: 5%;
-  display: flex;
- border-radius: 12px;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(9px + 2vmin);
-  color: white;
+  background-color: transparent;
+  color:#282c34
+}
+button::after {
+  background-color: transparent;
+  color:#282c34
 }
