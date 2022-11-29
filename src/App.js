@@ -10,9 +10,8 @@ const App = () => {
   const [totalFound, getTotalFound] = useState(0);
   const [buttonClicked, setButtonClicked] = React.useState(false);
 
-  const [nextSearch, setNextSearch] = useState('');
-  const [currentSearch, setCurrentSearch] = useState('');
-
+const [jsonHolder, setJsonHolder] = useState([])
+const [sub, setSub] =useState([])
   const [searchHolder, setSearchHolder] = useState([]);
 
   const nameRef = useRef();
@@ -61,28 +60,26 @@ const App = () => {
 
     console.log(query)
     setSearchHolder( searchHolder => [...searchHolder, query])
+    console.log(searchHolder);
     let url = query
+
     const fetchData = async () => {
       try {
         // initial response
         const response = await fetch(url);
         const json = await response.json();
-        console.log(json)
-        console.log(json.link[1].url);
-        setNextSearch(json.link[1].url);
-        setCurrentSearch(json.link[0].url)
-
+ 
+        setSearchHolder(searchHolder => [...searchHolder, json.link[1].url]);
         // get the number of search results and the results and save them as states
         getTotalFound(json.total);
-        setProviderArray(json.entry);
-  
+        setProviderArray([...providerArray, ...json.entry]);
+        setJsonHolder(jsonHolder => [...jsonHolder, json.entry])
         orgDisplay(json);
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchData();
-    setButtonClicked(true)
   }
 
 
@@ -115,11 +112,11 @@ const App = () => {
   }
 
 function orgDisplay(json) {
-
+   console.log(json)
         // this gets the location reference numbers for all the providers 
         let locURLArray = [];
         json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs(locURLArray);
+        getLocationURLs([...locationURLs, ...locURLArray]);
         // gets the specialty data if it exists
         let specialtyArray = [];
         json.entry.forEach(provider => {
@@ -129,14 +126,27 @@ function orgDisplay(json) {
           } else {
             specialtyArray.push('Not Available')
           }
-          setProviderSpecialtyList(specialtyArray);
+          console.log(specialtyArray);
+          setProviderSpecialtyList([...providerSpecialtyList, ...specialtyArray]);
         })
+        setButtonClicked(true)
 }
   function next(){
     console.log('next');
+    console.log(providerArray);
+    getDatData(searchHolder[searchHolder.length -1])
+    console.log('searchHolder: ' +[...searchHolder]);
+    console.log(jsonHolder);
 
-    console.log(searchHolder);
-   getDatData(nextSearch);
+    jsonHolder.forEach(json => {
+      console.log(json);
+      setSub([...sub, ...json]);
+    })
+
+      // setSub(sub => [...sub, json]);
+
+    console.log(sub);
+  //  searchHolder.forEach(url => getDatData(url));
   }
 
 function back() {
