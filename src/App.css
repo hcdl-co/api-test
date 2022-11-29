@@ -36,7 +36,8 @@ p {
 }
 
 table {
-margin:auto
+margin:auto;
+margin-bottom: 20rem;
 }
 th {
   border-color: #282c34;

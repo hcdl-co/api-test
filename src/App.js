@@ -125,7 +125,7 @@ const App = () => {
 
       <input
         name="name"
-        placeholder="search by name"
+        placeholder="search by last name"
         ref={nameRef}
         id="searchInput"
       />
