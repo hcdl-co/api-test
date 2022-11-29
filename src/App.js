@@ -9,9 +9,7 @@ const App = () => {
   const [providerSpecialtyList, setProviderSpecialtyList] = useState([]);
   const [totalFound, getTotalFound] = useState(0);
   const [buttonClicked, setButtonClicked] = React.useState(false);
-
-const [jsonHolder, setJsonHolder] = useState([])
-const [sub, setSub] =useState([])
+  const [resultTracker, setResultTracker] = useState(0);
   const [searchHolder, setSearchHolder] = useState([]);
 
   const nameRef = useRef();
@@ -19,7 +17,19 @@ const [sub, setSub] =useState([])
   const stateRef = useRef();
   const postalRef = useRef();
 
-  function sortCriteria() {
+  function handleChange(e) {
+    e.preventDefault();
+    // it's a new search we need to reset the arrays
+    setProviderArray([]);
+    getLocationURLs([]);
+    setProviderSpecialtyList([]);
+    setSearchHolder([]);
+    setButtonClicked(false);
+
+    console.log(providerArray);
+  }
+
+  function sortCriteria(e) {
 
     let name = nameRef.current.value;
     let city = cityRef.current.value;
@@ -57,10 +67,9 @@ const [sub, setSub] =useState([])
   }
 // this function gets the data from the api and then sorts it out into an array
   function getDatData(query) {
-
-    console.log(query)
+    console.log(providerArray);
     setSearchHolder( searchHolder => [...searchHolder, query])
-    console.log(searchHolder);
+
     let url = query
 
     const fetchData = async () => {
@@ -68,12 +77,12 @@ const [sub, setSub] =useState([])
         // initial response
         const response = await fetch(url);
         const json = await response.json();
- 
+
         setSearchHolder(searchHolder => [...searchHolder, json.link[1].url]);
         // get the number of search results and the results and save them as states
         getTotalFound(json.total);
         setProviderArray([...providerArray, ...json.entry]);
-        setJsonHolder(jsonHolder => [...jsonHolder, json.entry])
+        setResultTracker(resultTracker + json.entry.length)
         orgDisplay(json);
       } catch (error) {
         console.log("error", error);
@@ -126,37 +135,19 @@ function orgDisplay(json) {
           } else {
             specialtyArray.push('Not Available')
           }
-          console.log(specialtyArray);
+
           setProviderSpecialtyList([...providerSpecialtyList, ...specialtyArray]);
         })
         setButtonClicked(true)
 }
   function next(){
     console.log('next');
-    console.log(providerArray);
+
     getDatData(searchHolder[searchHolder.length -1])
-    console.log('searchHolder: ' +[...searchHolder]);
-    console.log(jsonHolder);
+    console.log('searchHolder: ' +searchHolder[searchHolder.length -1]);
 
-    jsonHolder.forEach(json => {
-      console.log(json);
-      setSub([...sub, ...json]);
-    })
-
-      // setSub(sub => [...sub, json]);
-
-    console.log(sub);
-  //  searchHolder.forEach(url => getDatData(url));
   }
 
-function back() {
-  console.log('back')
-  console.log("searchHolder in back: " + searchHolder);
-  console.log(searchHolder.length -2)
-  console.log(searchHolder[searchHolder.length -2])
-
-getDatData(searchHolder[searchHolder.length -2]);
-}
 
   return (
     <div className="App">
@@ -170,35 +161,39 @@ getDatData(searchHolder[searchHolder.length -2]);
         placeholder="search by last name"
         ref={nameRef}
         id="searchInput"
+        onChange={handleChange}
       />
       <input
         name="city"
         placeholder="search by city"
         ref={cityRef}
         id="searchInput"
+        onChange={handleChange}
       />
       <input
         name="state"
         placeholder="search by state abb. "
         ref={stateRef}
         id="searchInput"
+        onChange={handleChange}
       />
       <input
         name="search"
         placeholder="search by postal code"
         ref={postalRef}
         id="searchInput"
+        onChange={handleChange}
       />
 
       <button onClick={sortCriteria}>Find A Doctor</button>
       {totalFound === 0 && buttonClicked ? (
         <p>We didn't find anything that matched that search criteria</p>
       ) : null}
-      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search. Showing <a>10</a> results.</p>) : null}
+      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search. Showing <a>{resultTracker}</a> results.</p>) : null}
       {providerArray !== undefined && providerArray.length ? (
 <div>
-<button onClick={back}>Back</button>
-<button onClick={next}>Next</button>
+
+
 
         <table>
           
@@ -228,8 +223,8 @@ getDatData(searchHolder[searchHolder.length -2]);
             )
           })
           }
- 
         </table>
+        <button className="showButton" onClick={next}>Show More Results</button>
      </div>
       ) : null}
  
