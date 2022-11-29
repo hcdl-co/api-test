@@ -12,6 +12,9 @@ const App = () => {
 
   const [nextSearch, setNextSearch] = useState('');
   const [currentSearch, setCurrentSearch] = useState('');
+
+  const [searchHolder, setSearchHolder] = useState([]);
+
   const nameRef = useRef();
   const cityRef = useRef();
   const stateRef = useRef();
@@ -28,11 +31,11 @@ const App = () => {
     let cityCriteria = '&location.address-city=' + city
     let stateCriteria = '&location.address-state=' + state
     let postalCriteria = '&location.address-postalcode=' + postalCode
-    let specialty = '&specialty=207Q00000X'
+    // let specialty = '&specialty=207Q00000X'
 
-    let internal = '207RG0100X'
-    let derma = '207N00000X'
-    let family = '207Q00000X'
+    // let internal = '207RG0100X'
+    // let derma = '207N00000X'
+    // let family = '207Q00000X'
     if (name !== '') {
       searchCriteria = searchCriteria + nameCriteria
     }
@@ -57,6 +60,7 @@ const App = () => {
   function getDatData(query) {
 
     console.log(query)
+    setSearchHolder( searchHolder => [...searchHolder, query])
     let url = query
     const fetchData = async () => {
       try {
@@ -129,51 +133,19 @@ function orgDisplay(json) {
         })
 }
   function next(){
-    console.log('next')
-    let url = `${nextSearch}`;
-    const fetchData = async () => {
-      try {
-        // initial response
-        const response = await fetch(url);
-        const json = await response.json();
-        console.log(json)
-        console.log(json.link[1].url);
-        setNextSearch(json.link[1].url);
-        console.log(currentSearch);
-        // get the number of search results and the results and save them as states
-        getTotalFound(json.total);
-        setProviderArray(json.entry);
-        orgDisplay(json);
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-    fetchData();
+    console.log('next');
+
+    console.log(searchHolder);
+   getDatData(nextSearch);
   }
 
 function back() {
   console.log('back')
-  let url = `${currentSearch}`;
-  console.log(url)
-  const fetchData = async () => {
-    try {
-      // initial response
-      const response = await fetch(url);
-      const json = await response.json();
-      console.log(json)
-      console.log(json.link[1].url);
-      setNextSearch(json.link[1].url)
+  console.log("searchHolder in back: " + searchHolder);
+  console.log(searchHolder.length -2)
+  console.log(searchHolder[searchHolder.length -2])
 
-      // get the number of search results and the results and save them as states
-      getTotalFound(json.total);
-      setProviderArray(json.entry);
-
-      orgDisplay(json);
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-  fetchData();
+getDatData(searchHolder[searchHolder.length -2]);
 }
 
   return (
