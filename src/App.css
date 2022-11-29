@@ -37,7 +37,11 @@ p {
 
 table {
 margin:auto;
-margin-bottom: 20rem;
+}
+
+.showButton {
+  
+margin:  5rem;
 }
 th {
   border-color: #282c34;
