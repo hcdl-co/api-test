@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import logo from './logo.svg';
 import './App.css';
 
@@ -7,35 +7,64 @@ const App = () => {
 
   const [locationURLs, getLocationURLs] = useState([])
   const [providerSpecialtyList, setProviderSpecialtyList] = useState([]);
-
-
-  const searchRef = useRef();
-
+  const [totalFound, getTotalFound] = useState(0);
+  const [buttonClicked, setButtonClicked] = React.useState(false)
   const nameRef = useRef();
   const cityRef = useRef();
   const stateRef = useRef();
   const postalRef = useRef();
 
+  function sortCriteria() {
 
-  console.log(providerArray)
+    let name = nameRef.current.value;
+    let city = cityRef.current.value;
+    let state = stateRef.current.value;
+    let postalCode = postalRef.current.value;
+    let searchCriteria = ''
+    let nameCriteria = '&name=' + name
+    let cityCriteria = '&location.address-city=' + city
+    let stateCriteria = '&location.address-state=' + state
+    let postalCriteria = '&location.address-postalcode=' + postalCode
 
 
-  function searchLocationPostalCode() {
-    console.log(providerArray);
+    if (name !== '') {
+      searchCriteria = searchCriteria + nameCriteria
+    }
 
-    let postalCode = searchRef.current.value
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&location.address-postalcode=${postalCode}`;
+    if (city !== '') {
+      searchCriteria = searchCriteria + cityCriteria
+    }
+
+    if (state !== '') {
+      searchCriteria = searchCriteria + stateCriteria
+    }
+    if (postalCode !== '') {
+      searchCriteria = searchCriteria + postalCriteria
+    }
+
+    getDatData(searchCriteria)
+
+
+  }
+// this function gets the data from the api and then sorts it out into an array
+  function getDatData(query) {
+    setButtonClicked(true)
+
+    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&${query}`;
     const fetchData = async () => {
       try {
+        // initial response
         const response = await fetch(url);
         const json = await response.json();
-
+        // get the number of search results and the results and save them as states
+        getTotalFound(json.total);
         setProviderArray(json.entry);
 
+        // this gets the location reference numbers for all the providers 
         let locURLArray = [];
         json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
         getLocationURLs(locURLArray);
-
+        // gets the specialty data if it exists
         let specialtyArray = [];
         json.entry.forEach(provider => {
 
@@ -50,157 +79,15 @@ const App = () => {
         console.log("error", error);
       }
     };
-
-    fetchData();
-  }
-  function searchSpecialty() {
-    console.log(providerArray);
-
-    console.log(searchRef.current.value)
-
-    let postalCode = searchRef.current.value
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&specialty=${postalCode}`;
-    const fetchData = async () => {
-      try {
-        const response = await fetch(url);
-        const json = await response.json();
-        console.log(json);
-        // setProviderArray(json.entry);
-
-        // let locURLArray = [];
-        // json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        // getLocationURLs(locURLArray);
-
-        // let specialtyArray = [];
-        // json.entry.forEach(provider => {
-
-        //   if (provider.resource.specialty) {
-        //     specialtyArray.push(provider.resource.specialty[0].text)
-        //   } else {
-        //     specialtyArray.push('Not Available')
-        //   }
-        //   setProviderSpecialtyList(specialtyArray);
-        // })
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-
-    fetchData();
-  }
-  function searchCity() {
-    console.log(providerArray);
-
-    console.log(searchRef.current.value)
-
-    let postalCode = searchRef.current.value
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&location.address-postalcode=${postalCode}`;
-    const fetchData = async () => {
-      try {
-        const response = await fetch(url);
-        const json = await response.json();
-
-        setProviderArray(json.entry);
-
-        let locURLArray = [];
-        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs(locURLArray);
-
-        let specialtyArray = [];
-        json.entry.forEach(provider => {
-
-          if (provider.resource.specialty) {
-            specialtyArray.push(provider.resource.specialty[0].text)
-          } else {
-            specialtyArray.push('Not Available')
-          }
-          setProviderSpecialtyList(specialtyArray);
-        })
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-
-    fetchData();
-  }
-
-  function searchLocationPostalCode() {
-    console.log(providerArray);
-
-    console.log(searchRef.current.value)
-
-    let postalCode = searchRef.current.value
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&location.address-postalcode=${postalCode}`;
-    const fetchData = async () => {
-      try {
-        const response = await fetch(url);
-        const json = await response.json();
-
-        setProviderArray(json.entry);
-
-        let locURLArray = [];
-        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs(locURLArray);
-
-        let specialtyArray = [];
-        json.entry.forEach(provider => {
-
-          if (provider.resource.specialty) {
-            specialtyArray.push(provider.resource.specialty[0].text)
-          } else {
-            specialtyArray.push('Not Available')
-          }
-          setProviderSpecialtyList(specialtyArray);
-        })
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-
-    fetchData();
-  }
-
-  function showData() {
-    console.log(providerArray);
-
-    console.log(searchRef.current.value)
-    let nameQuery = searchRef.current.value;
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&name=${nameQuery}`;
-    const fetchData = async () => {
-      try {
-        const response = await fetch(url);
-        const json = await response.json();
-
-        setProviderArray(json.entry);
-
-        let locURLArray = [];
-        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs(locURLArray);
-
-        let specialtyArray = [];
-        json.entry.forEach(provider => {
-
-          if (provider.resource.specialty) {
-            specialtyArray.push(provider.resource.specialty[0].text)
-          } else {
-            specialtyArray.push('Not Available')
-          }
-          setProviderSpecialtyList(specialtyArray);
-        })
-
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-
     fetchData();
 
   }
 
 
 
+// when someone clicks the "show address" button this query will take the location reference and query it separately
   function showAddress(e) {
-
+    //we use the index number of the main provider search to get the location - having set it to the value of the output
     let location = locationURLs[e.target.value];
 
     const fetchLocation = async () => {
@@ -209,10 +96,11 @@ const App = () => {
         let locationLink = `https://public.fhir.flex.optum.com/R4/${location}`;
         const response = await fetch(locationLink);
         const json = await response.json();
+        //we don't want to get the location data if it didn't get anything so we wrapped it in an if statement
         if (locationURLs === []) {
           getLocationURLs(json.name)
         }
-
+        //change the button to display the address
         e.target.innerHTML = json.name
 
       } catch (error) {
@@ -226,7 +114,7 @@ const App = () => {
 
 
 
-  // if (gotData === true) {
+
 
   return (
     <div className="App">
@@ -238,29 +126,33 @@ const App = () => {
       <input
         name="name"
         placeholder="search by name"
-        ref={searchRef}
+        ref={nameRef}
         id="searchInput"
       />
-        <input
+      <input
         name="city"
         placeholder="search by city"
-        ref={searchRef}
+        ref={cityRef}
         id="searchInput"
       />
-        <input
+      <input
         name="state"
         placeholder="search by state"
-        ref={searchRef}
+        ref={stateRef}
         id="searchInput"
       />
-        <input
+      <input
         name="search"
         placeholder="search by postal code"
-        ref={searchRef}
+        ref={postalRef}
         id="searchInput"
       />
 
-      <button onClick={showData}>Find A Doctor</button>
+      <button onClick={sortCriteria}>Find A Doctor</button>
+      {totalFound === 0 && buttonClicked ? (
+        <p>We didn't find anything that matched that search criteria</p>
+      ) : null}
+      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search</p>) : null}
       {providerArray !== undefined && providerArray.length ? (
 
         <table>
@@ -292,35 +184,20 @@ const App = () => {
           }
 
         </table>
-      ) : (<div><p>Sorry, your search did not work, please try again or notify our team  at info@healthcareDL.com</p></div>)}
+      ) : null}
+ 
+      {providerArray === undefined ? (
+        <div>
+          <p>Sorry, your search did not work, please try again or notify our team  at info@healthcareDL.com</p>
+        </div>
+      ) : null}
 
     </div>
 
 
   )
 
-  // } else {
-  //   return (
 
-  //     <div className="App">
-  //       <header className="App-header">
-  //         <h1>Search for a United Healthcare Provider</h1>
-  //         <p>brought to you by Healthcare Download. Get in control, stay in control.</p>
-  //       </header>
-  //       <main>
-  //         <input
-  //           name="search"
-  //           placeholder="provider last name"
-  //           ref={searchRef}
-  //           id="searchInput"
-
-  //         />
-  //         <button onClick={showData}>Show Data</button>
-  //         <button onClick={searchLocationPostalCode}> Search By Postal Code</button>
-  //       </main>
-  //     </div>
-  //   )
-  // }
 };
 
 export default App;
