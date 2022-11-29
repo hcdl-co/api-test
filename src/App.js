@@ -8,7 +8,10 @@ const App = () => {
   const [locationURLs, getLocationURLs] = useState([])
   const [providerSpecialtyList, setProviderSpecialtyList] = useState([]);
   const [totalFound, getTotalFound] = useState(0);
-  const [buttonClicked, setButtonClicked] = React.useState(false)
+  const [buttonClicked, setButtonClicked] = React.useState(false);
+
+  const [nextSearch, setNextSearch] = useState('');
+  const [currentSearch, setCurrentSearch] = useState('');
   const nameRef = useRef();
   const cityRef = useRef();
   const stateRef = useRef();
@@ -25,8 +28,11 @@ const App = () => {
     let cityCriteria = '&location.address-city=' + city
     let stateCriteria = '&location.address-state=' + state
     let postalCriteria = '&location.address-postalcode=' + postalCode
+    let specialty = '&specialty=207Q00000X'
 
-
+    let internal = '207RG0100X'
+    let derma = '207N00000X'
+    let family = '207Q00000X'
     if (name !== '') {
       searchCriteria = searchCriteria + nameCriteria
     }
@@ -36,51 +42,43 @@ const App = () => {
     }
 
     if (state !== '') {
+      console.log(state);
       searchCriteria = searchCriteria + stateCriteria
     }
     if (postalCode !== '') {
       searchCriteria = searchCriteria + postalCriteria
     }
-
-    getDatData(searchCriteria)
+    let FirstQuery = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&${searchCriteria}`;
+    getDatData(FirstQuery)
 
 
   }
 // this function gets the data from the api and then sorts it out into an array
   function getDatData(query) {
-    setButtonClicked(true)
 
-    let url = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&${query}`;
+    console.log(query)
+    let url = query
     const fetchData = async () => {
       try {
         // initial response
         const response = await fetch(url);
         const json = await response.json();
+        console.log(json)
+        console.log(json.link[1].url);
+        setNextSearch(json.link[1].url);
+        setCurrentSearch(json.link[0].url)
+
         // get the number of search results and the results and save them as states
         getTotalFound(json.total);
         setProviderArray(json.entry);
-
-        // this gets the location reference numbers for all the providers 
-        let locURLArray = [];
-        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs(locURLArray);
-        // gets the specialty data if it exists
-        let specialtyArray = [];
-        json.entry.forEach(provider => {
-
-          if (provider.resource.specialty) {
-            specialtyArray.push(provider.resource.specialty[0].text)
-          } else {
-            specialtyArray.push('Not Available')
-          }
-          setProviderSpecialtyList(specialtyArray);
-        })
+  
+        orgDisplay(json);
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchData();
-
+    setButtonClicked(true)
   }
 
 
@@ -112,9 +110,71 @@ const App = () => {
 
   }
 
+function orgDisplay(json) {
 
+        // this gets the location reference numbers for all the providers 
+        let locURLArray = [];
+        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
+        getLocationURLs(locURLArray);
+        // gets the specialty data if it exists
+        let specialtyArray = [];
+        json.entry.forEach(provider => {
+          // console.log(provider.resource.specialty);
+          if (provider.resource.specialty) {
+            specialtyArray.push(provider.resource.specialty[0].text)
+          } else {
+            specialtyArray.push('Not Available')
+          }
+          setProviderSpecialtyList(specialtyArray);
+        })
+}
+  function next(){
+    console.log('next')
+    let url = `${nextSearch}`;
+    const fetchData = async () => {
+      try {
+        // initial response
+        const response = await fetch(url);
+        const json = await response.json();
+        console.log(json)
+        console.log(json.link[1].url);
+        setNextSearch(json.link[1].url);
+        console.log(currentSearch);
+        // get the number of search results and the results and save them as states
+        getTotalFound(json.total);
+        setProviderArray(json.entry);
+        orgDisplay(json);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    fetchData();
+  }
 
+function back() {
+  console.log('back')
+  let url = `${currentSearch}`;
+  console.log(url)
+  const fetchData = async () => {
+    try {
+      // initial response
+      const response = await fetch(url);
+      const json = await response.json();
+      console.log(json)
+      console.log(json.link[1].url);
+      setNextSearch(json.link[1].url)
 
+      // get the number of search results and the results and save them as states
+      getTotalFound(json.total);
+      setProviderArray(json.entry);
+
+      orgDisplay(json);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+  fetchData();
+}
 
   return (
     <div className="App">
@@ -137,7 +197,7 @@ const App = () => {
       />
       <input
         name="state"
-        placeholder="search by state"
+        placeholder="search by state abb. "
         ref={stateRef}
         id="searchInput"
       />
@@ -154,8 +214,12 @@ const App = () => {
       ) : null}
       {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search. Showing <a>10</a> results.</p>) : null}
       {providerArray !== undefined && providerArray.length ? (
+<div>
+<button onClick={back}>Back</button>
+<button onClick={next}>Next</button>
 
         <table>
+          
           <thead>
             <tr>
               <th>NAME</th>
@@ -182,8 +246,9 @@ const App = () => {
             )
           })
           }
-
+ 
         </table>
+     </div>
       ) : null}
  
       {providerArray === undefined ? (
