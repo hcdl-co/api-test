@@ -23,6 +23,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  min-width: 328px;
 }
 
 .App-link {
@@ -31,11 +32,11 @@
 
 p {
   font-size: 0.75rem;
+  padding: 3%;
 }
 
 table {
-
-  margin: 10%;
+margin:auto
 }
 th {
   border-color: #282c34;

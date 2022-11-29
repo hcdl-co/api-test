@@ -152,7 +152,7 @@ const App = () => {
       {totalFound === 0 && buttonClicked ? (
         <p>We didn't find anything that matched that search criteria</p>
       ) : null}
-      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search</p>) : null}
+      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search. Showing <a>10</a> results.</p>) : null}
       {providerArray !== undefined && providerArray.length ? (
 
         <table>
