@@ -150,13 +150,13 @@ const blank = providerArray;
             {providerArray.map((provider, index) => {
 
             return (
-              <tbody key={provider}>
+              <tbody key={provider.fullUrl}>
                   <tr>
 
-                <td key={index+ 1}>{provider.resource.name}</td>
-                <td key={index  + 10}>{providerSpecialtyList[index]}</td>
-                <td key={index * 10}>{provider.resource.telecom[0].value}</td>
-                <td><button key={index / 10} value={index} onClick={showAddress}>Show Address</button></td>
+                <td key={provider.resource.name}>{provider.resource.name}</td>
+                <td key={providerSpecialtyList[index]}>{providerSpecialtyList[index]}</td>
+                <td key={provider.resource.telecom[0].value}>{provider.resource.telecom[0].value}</td>
+                <td><button key={index} value={index} onClick={showAddress}>Show Address</button></td>
                 </tr>
 
               </tbody>
