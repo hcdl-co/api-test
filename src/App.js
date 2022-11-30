@@ -25,16 +25,18 @@ const App = () => {
     setProviderSpecialtyList([]);
     setSearchHolder([]);
     setButtonClicked(false);
-
+    getTotalFound(0);
+    setResultTracker(0);
     console.log(providerArray);
   }
 
-  function sortCriteria(e) {
+  function sortCriteria() {
 
     let name = nameRef.current.value;
     let city = cityRef.current.value;
     let state = stateRef.current.value;
     let postalCode = postalRef.current.value;
+
     let searchCriteria = ''
     let nameCriteria = '&name=' + name
     let cityCriteria = '&location.address-city=' + city
@@ -60,27 +62,35 @@ const App = () => {
     if (postalCode !== '') {
       searchCriteria = searchCriteria + postalCriteria
     }
-    let FirstQuery = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov&${searchCriteria}`;
+    let FirstQuery = `https://public.fhir.flex.optum.com/R4/HealthcareService?service-category=prov${searchCriteria}`;
     getDatData(FirstQuery)
 
 
   }
-// this function gets the data from the api and then sorts it out into an array
+  // this function gets the data from the api and then sorts it out into an array
   function getDatData(query) {
+
     console.log(providerArray);
-    setSearchHolder( searchHolder => [...searchHolder, query])
+    //why is this here??? what does it do?
+    setSearchHolder(searchHolder => [...searchHolder, query])
 
     let url = query
-
+ 
     const fetchData = async () => {
+      setButtonClicked(true)
       try {
+        console.log(url);
         // initial response
         const response = await fetch(url);
         const json = await response.json();
-
-        setSearchHolder(searchHolder => [...searchHolder, json.link[1].url]);
+        //adding to an array
+        if(json.link[1]){
+        let next = json.link[1].url
+        setSearchHolder(searchHolder => [...searchHolder, next]);
+        }
         // get the number of search results and the results and save them as states
         getTotalFound(json.total);
+        console.log(json.total)
         setProviderArray([...providerArray, ...json.entry]);
         setResultTracker(resultTracker + json.entry.length)
         orgDisplay(json);
@@ -93,7 +103,7 @@ const App = () => {
 
 
 
-// when someone clicks the "show address" button this query will take the location reference and query it separately
+  // when someone clicks the "show address" button this query will take the location reference and query it separately
   function showAddress(e) {
     //we use the index number of the main provider search to get the location - having set it to the value of the output
     let location = locationURLs[e.target.value];
@@ -113,6 +123,7 @@ const App = () => {
 
       } catch (error) {
         console.log("error", error);
+        alert('something went wrong with your search, please try again or contact us at info@healthcareDL.com')
       }
     };
 
@@ -120,31 +131,31 @@ const App = () => {
 
   }
 
-function orgDisplay(json) {
-   console.log(json)
-        // this gets the location reference numbers for all the providers 
-        let locURLArray = [];
-        json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
-        getLocationURLs([...locationURLs, ...locURLArray]);
-        // gets the specialty data if it exists
-        let specialtyArray = [];
-        json.entry.forEach(provider => {
-          // console.log(provider.resource.specialty);
-          if (provider.resource.specialty) {
-            specialtyArray.push(provider.resource.specialty[0].text)
-          } else {
-            specialtyArray.push('Not Available')
-          }
+  function orgDisplay(json) {
+    console.log(json)
+    // this gets the location reference numbers for all the providers 
+    let locURLArray = [];
+    json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
+    getLocationURLs([...locationURLs, ...locURLArray]);
+    // gets the specialty data if it exists
+    let specialtyArray = [];
+    json.entry.forEach(provider => {
 
-          setProviderSpecialtyList([...providerSpecialtyList, ...specialtyArray]);
-        })
-        setButtonClicked(true)
-}
-  function next(){
+      if (provider.resource.specialty) {
+        specialtyArray.push(provider.resource.specialty[0].text)
+      } else {
+        specialtyArray.push('Not Available')
+      }
+      //merging arrays
+      setProviderSpecialtyList([...providerSpecialtyList, ...specialtyArray]);
+    })
+ 
+  }
+  function next() {
     console.log('next');
 
-    getDatData(searchHolder[searchHolder.length -1])
-    console.log('searchHolder: ' +searchHolder[searchHolder.length -1]);
+    getDatData(searchHolder[searchHolder.length - 1])
+    console.log('searchHolder: ' + searchHolder[searchHolder.length - 1]);
 
   }
 
@@ -152,82 +163,91 @@ function orgDisplay(json) {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <img 
+        src={logo} 
+        className="App-logo" 
+        alt="logo" 
+        />
         <h1>United Healthcare Providers</h1>
-        <p>brought to you by healthcare Download. Get in control, stay in control.</p></header>
+        <p>brought to you by healthcare Download.
+          Get in control, stay in control.</p>
+      </header>
 
       <input
         name="name"
         placeholder="search by last name"
         ref={nameRef}
-        id="searchInput"
         onChange={handleChange}
       />
       <input
         name="city"
         placeholder="search by city"
         ref={cityRef}
-        id="searchInput"
         onChange={handleChange}
       />
       <input
         name="state"
         placeholder="search by state abb. "
         ref={stateRef}
-        id="searchInput"
         onChange={handleChange}
       />
       <input
-        name="search"
+        name="postalcode"
         placeholder="search by postal code"
         ref={postalRef}
-        id="searchInput"
         onChange={handleChange}
       />
 
       <button onClick={sortCriteria}>Find A Doctor</button>
-      {totalFound === 0 && buttonClicked ? (
-        <p>We didn't find anything that matched that search criteria</p>
+      {totalFound === 0 && buttonClicked && providerArray.length <1 ? (
+        
+        <p className="notfound">We didn't find anything that matched that search criteria</p>
       ) : null}
-      {totalFound > 10 ? (<p>We found {totalFound} results matching that criteria, consider refining your search. Showing <a>{resultTracker}</a> results.</p>) : null}
+      {/* this doesn't work like it should */}
+      {totalFound > 0 ? (
+        <p>We found {totalFound} results matching that criteria.
+          Showing <a>{resultTracker}</a> results.</p>
+      ) : null}
       {providerArray !== undefined && providerArray.length ? (
-<div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>NAME</th>
+                <th>SPECIALTY</th>
+                <th>PHONE</th>
+                <th>ADDRESS</th>
+              </tr>
+            </thead>
 
+            {providerArray.map((provider, index) => {
 
+              return (
+                <tbody key={provider.fullUrl}>
+                  <tr>
+                    <td key={provider.resource.name}>{provider.resource.name}</td>
+                    <td key={providerSpecialtyList[index]}>{providerSpecialtyList[index]}</td>
+                    <td key={provider.resource.telecom[0].value}>{provider.resource.telecom[0].value}</td>
+                    <td><button key={index} value={index} onClick={showAddress}>Show Address</button></td>
+                  </tr>
+                </tbody>
 
-        <table>
-          
-          <thead>
-            <tr>
-              <th>NAME</th>
-              <th>SPECIALTY</th>
-              <th>PHONE</th>
-              <th>ADDRESS</th>
-            </tr>
-          </thead>
-
-          {providerArray.map((provider, index) => {
-
-            return (
-              <tbody key={provider.fullUrl}>
-                <tr>
-
-                  <td key={provider.resource.name}>{provider.resource.name}</td>
-                  <td key={providerSpecialtyList[index]}>{providerSpecialtyList[index]}</td>
-                  <td key={provider.resource.telecom[0].value}>{provider.resource.telecom[0].value}</td>
-                  <td><button key={index} value={index} onClick={showAddress}>Show Address</button></td>
-                </tr>
-
-              </tbody>
-
-            )
-          })
-          }
-        </table>
-        <button className="showButton" onClick={next}>Show More Results</button>
-     </div>
+              )
+            })
+            }
+          </table>
+          {
+          searchHolder !== undefined && searchHolder.length > 1 ? ( 
+             <button 
+             className="showButton" 
+             onClick={next}
+             >Show More Results
+             </button>
+             ) :null}
+        
+        </div>
       ) : null}
- 
+
       {providerArray === undefined ? (
         <div>
           <p>Sorry, your search did not work, please try again or notify our team  at info@healthcareDL.com</p>
