@@ -11,6 +11,7 @@ const App = () => {
   const [buttonClicked, setButtonClicked] = React.useState(false);
   const [resultTracker, setResultTracker] = useState(0);
   const [searchHolder, setSearchHolder] = useState([]);
+  const [noResultsCall, setNoResultsCall] = useState(false) 
 
   const nameRef = useRef();
   const cityRef = useRef();
@@ -27,11 +28,28 @@ const App = () => {
     setButtonClicked(false);
     getTotalFound(0);
     setResultTracker(0);
+    setNoResultsCall(false);
     console.log(providerArray);
   }
 
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  async function delayedGreeting(e) {
+
+    await sleep(5000)
+      setNoResultsCall(true);
+      console.log('delay');
+  
+ 
+  }
+  
+
   function sortCriteria() {
 
+    delayedGreeting();
+    console.log(noResultsCall);
     let name = nameRef.current.value;
     let city = cityRef.current.value;
     let state = stateRef.current.value;
@@ -199,14 +217,17 @@ const App = () => {
       />
 
       <button onClick={sortCriteria}>Find A Doctor</button>
-      {totalFound === 0 && buttonClicked && providerArray.length <1 ? (
-        
-        <p className="notfound">We didn't find anything that matched that search criteria</p>
+            {/* this doesn't work like it should */}
+      {  buttonClicked && totalFound === 0 && noResultsCall ? (
+        <div>
+         <p className="notfound">We didn't find anything that matched that search criteria</p> 
+   <p>{totalFound}</p>
+   </div>
       ) : null}
-      {/* this doesn't work like it should */}
+
       {totalFound > 0 ? (
         <p>We found {totalFound} results matching that criteria.
-          Showing <a>{resultTracker}</a> results.</p>
+          Showing {resultTracker} results.</p>
       ) : null}
       {providerArray !== undefined && providerArray.length ? (
         <div>
