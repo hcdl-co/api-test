@@ -89,23 +89,23 @@ const App = () => {
   // this function gets the data from the api and then sorts it out into an array
   function getDatData(query) {
 
-    
-    //why is this here??? what does it do?
-    setSearchHolder(searchHolder => [...searchHolder, query])
 
-    let url = query
+    //adds initial query to search holder
+    if (searchHolder.length < 1) {
+      setSearchHolder(searchHolder => [...searchHolder, query])
+    }
 
     const fetchData = async () => {
       setButtonClicked(true)
       try {
-     
+
         // initial response
-        const response = await fetch(url);
+        const response = await fetch(query);
         const json = await response.json();
         DataTracking(json);
-   
+
         setProviderArray([...providerArray, ...json.entry]);
-        
+
         orgDisplay(json);
       } catch (error) {
         console.log("error", error);
@@ -115,7 +115,7 @@ const App = () => {
   }
 
   //gets all the data tracking states: total results, queries, and amount of data returned/displayed
-function DataTracking(json) {
+  function DataTracking(json) {
     //adding to an array
     if (json.link[1]) {
       let next = json.link[1].url
@@ -123,7 +123,7 @@ function DataTracking(json) {
     }
     getTotalFound(json.total);
     setResultTracker(resultTracker + json.entry.length)
-}
+  }
 
   // when someone clicks the "show address" button this query will take the location reference and query it separately
   function showAddress(e) {
@@ -141,12 +141,12 @@ function DataTracking(json) {
           getLocationURLs(json.name)
         }
         //change the button to display the address
-        if(json.name) {
+        if (json.name) {
           e.target.innerHTML = json.name
         } else {
           e.target.innerHTML = "Not Available"
         }
- 
+
 
       } catch (error) {
         console.log("error", error);
@@ -156,7 +156,7 @@ function DataTracking(json) {
     fetchLocation();
 
   }
-// there was some weirdness with getting these two
+  // there was some weirdness with getting these two
   function orgDisplay(json) {
 
     // this gets the location reference numbers for all the providers and puts them into the locationURLS state to be used later
@@ -265,7 +265,7 @@ function DataTracking(json) {
             }
           </table>
           {
-            searchHolder !== undefined && searchHolder.length > 1 ? (
+            searchHolder.length > 1 && totalFound !== resultTracker ? (
               <button
                 className="showButton"
                 onClick={next}
