@@ -11,7 +11,7 @@ const App = () => {
   const [buttonClicked, setButtonClicked] = React.useState(false);
   const [resultTracker, setResultTracker] = useState(0);
   const [searchHolder, setSearchHolder] = useState([]);
-  const [noResultsCall, setNoResultsCall] = useState(false) 
+  const [noResultsCall, setNoResultsCall] = useState(false)
 
   const nameRef = useRef();
   const cityRef = useRef();
@@ -29,27 +29,26 @@ const App = () => {
     getTotalFound(0);
     setResultTracker(0);
     setNoResultsCall(false);
-    console.log(providerArray);
   }
 
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-  
+
   async function delayedGreeting(e) {
 
     await sleep(5000)
-      setNoResultsCall(true);
-      console.log('delay');
-  
- 
+    setNoResultsCall(true);
+
+
+
   }
-  
+
 
   function sortCriteria() {
 
     delayedGreeting();
-    console.log(noResultsCall);
+
     let name = nameRef.current.value;
     let city = cityRef.current.value;
     let state = stateRef.current.value;
@@ -85,32 +84,28 @@ const App = () => {
 
 
   }
+
+
   // this function gets the data from the api and then sorts it out into an array
   function getDatData(query) {
 
-    console.log(providerArray);
+    
     //why is this here??? what does it do?
     setSearchHolder(searchHolder => [...searchHolder, query])
 
     let url = query
- 
+
     const fetchData = async () => {
       setButtonClicked(true)
       try {
-        console.log(url);
+     
         // initial response
         const response = await fetch(url);
         const json = await response.json();
-        //adding to an array
-        if(json.link[1]){
-        let next = json.link[1].url
-        setSearchHolder(searchHolder => [...searchHolder, next]);
-        }
-        // get the number of search results and the results and save them as states
-        getTotalFound(json.total);
-        console.log(json.total)
+        DataTracking(json);
+   
         setProviderArray([...providerArray, ...json.entry]);
-        setResultTracker(resultTracker + json.entry.length)
+        
         orgDisplay(json);
       } catch (error) {
         console.log("error", error);
@@ -119,7 +114,16 @@ const App = () => {
     fetchData();
   }
 
-
+  //gets all the data tracking states: total results, queries, and amount of data returned/displayed
+function DataTracking(json) {
+    //adding to an array
+    if (json.link[1]) {
+      let next = json.link[1].url
+      setSearchHolder(searchHolder => [...searchHolder, next]);
+    }
+    getTotalFound(json.total);
+    setResultTracker(resultTracker + json.entry.length)
+}
 
   // when someone clicks the "show address" button this query will take the location reference and query it separately
   function showAddress(e) {
@@ -137,24 +141,30 @@ const App = () => {
           getLocationURLs(json.name)
         }
         //change the button to display the address
-        e.target.innerHTML = json.name
+        if(json.name) {
+          e.target.innerHTML = json.name
+        } else {
+          e.target.innerHTML = "Not Available"
+        }
+ 
 
       } catch (error) {
         console.log("error", error);
-        alert('something went wrong with your search, please try again or contact us at info@healthcareDL.com')
       }
     };
 
     fetchLocation();
 
   }
-
+// there was some weirdness with getting these two
   function orgDisplay(json) {
-    console.log(json)
-    // this gets the location reference numbers for all the providers 
+
+    // this gets the location reference numbers for all the providers and puts them into the locationURLS state to be used later
     let locURLArray = [];
     json.entry.forEach(provider => locURLArray.push(provider.resource.location[0].reference))
     getLocationURLs([...locationURLs, ...locURLArray]);
+
+
     // gets the specialty data if it exists
     let specialtyArray = [];
     json.entry.forEach(provider => {
@@ -167,13 +177,11 @@ const App = () => {
       //merging arrays
       setProviderSpecialtyList([...providerSpecialtyList, ...specialtyArray]);
     })
- 
+
   }
   function next() {
-    console.log('next');
 
     getDatData(searchHolder[searchHolder.length - 1])
-    console.log('searchHolder: ' + searchHolder[searchHolder.length - 1]);
 
   }
 
@@ -181,10 +189,10 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img 
-        src={logo} 
-        className="App-logo" 
-        alt="logo" 
+        <img
+          src={logo}
+          className="App-logo"
+          alt="logo"
         />
         <h1>United Healthcare Providers</h1>
         <p>brought to you by healthcare Download.
@@ -217,12 +225,11 @@ const App = () => {
       />
 
       <button onClick={sortCriteria}>Find A Doctor</button>
-            {/* this doesn't work like it should */}
-      {  buttonClicked && totalFound === 0 && noResultsCall ? (
+      {/* this doesn't work like it should */}
+      {buttonClicked && totalFound === 0 && noResultsCall ? (
         <div>
-         <p className="notfound">We didn't find anything that matched that search criteria</p> 
-   <p>{totalFound}</p>
-   </div>
+          <p className="notfound">We didn't find anything that matched that search criteria</p>
+        </div>
       ) : null}
 
       {totalFound > 0 ? (
@@ -258,14 +265,14 @@ const App = () => {
             }
           </table>
           {
-          searchHolder !== undefined && searchHolder.length > 1 ? ( 
-             <button 
-             className="showButton" 
-             onClick={next}
-             >Show More Results
-             </button>
-             ) :null}
-        
+            searchHolder !== undefined && searchHolder.length > 1 ? (
+              <button
+                className="showButton"
+                onClick={next}
+              >Show More Results
+              </button>
+            ) : null}
+
         </div>
       ) : null}
 
